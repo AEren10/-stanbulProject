@@ -1,122 +1,82 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { AnimatePresence, motion } from 'motion/react'
+import { AppProvider } from './AppProvider'
+import { Confetti } from './components/Confetti'
+import { Explore } from './components/Explore'
+import { Blobs, ClickSparkles, ScrollProgress } from './components/fx'
+import { Home } from './components/Home'
+import { MapPage } from './components/MapPage'
+import { Nav } from './components/Nav'
+import { Passport } from './components/Passport'
+import { PlaceModal } from './components/PlaceModal'
+import { Tours } from './components/Tours'
+import { PLACES } from './data/places'
+import { useApp } from './useApp'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+function Ticker() {
+  const { lang, t } = useApp()
+  const items = PLACES.map((p) => `${p.emoji} ${lang === 'tr' ? p.tr : p.en}`)
+  const line = [t.ticker, ...items].join('   ✦   ')
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <div className="ticker" aria-hidden>
+      <div className="ticker-track">
+        <span>{line}   ✦   </span>
+        <span>{line}   ✦   </span>
+      </div>
+    </div>
   )
 }
 
-export default App
+function Shell() {
+  const { view, t, toast } = useApp()
+  return (
+    <div className="app">
+      <Blobs />
+      <ScrollProgress />
+      <Nav />
+      <Ticker />
+      <main>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={view}
+            initial={{ opacity: 0, y: 40, scale: 0.98, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -20, scale: 0.98, filter: 'blur(6px)' }}
+            transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
+            onAnimationStart={() => window.scrollTo({ top: 0 })}
+          >
+            {view === 'wheel' && <Home />}
+            {view === 'explore' && <Explore />}
+            {view === 'map' && <MapPage />}
+            {view === 'tours' && <Tours />}
+            {view === 'passport' && <Passport />}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+      <footer className="foot">{t.footer}</footer>
+      <PlaceModal />
+      <Confetti />
+      <ClickSparkles />
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            className="toast"
+            initial={{ y: -80, opacity: 0, scale: 0.8 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+          >
+            🏅 {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <Shell />
+    </AppProvider>
+  )
+}
