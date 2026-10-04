@@ -8,7 +8,7 @@
 - **Dev poster çarkı:** 128 dilimli halka, "Beni rastgele bir yere yolla!"
 - **Günün görevi:** her gün 3 yeni mekan, +30 XP
 - **Turlar:** 30 hazır rota, tema filtresi (tarih, lezzet, doğa, sanat, deniz, gece)
-- **Mekan detayı:** ilçe, ulaşım, giriş, en iyi zaman, ipucu; Vikipedi açıklaması ve fotoğraf galerisi, adım adım ilerleme ve Google Maps rota linki.
+- **Mekan detayı:** ilçe, ulaşım, giriş, en iyi zaman, ipucu; Vikipedi açıklaması ve fotoğraf galerisi. Turlarda adım adım ilerleme ve Google Maps rota linki.
 - **Pasaport:** XP, seviye, rozet ve damgalar (tarayıcıda saklanır).
 - Türkçe / English.
 
