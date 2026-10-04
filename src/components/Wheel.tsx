@@ -1,5 +1,5 @@
 import { animate, motion, useMotionValue, useMotionValueEvent } from 'motion/react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CAT_BY_ID } from '../data/categories'
 import type { Place } from '../data/types'
 import { useApp } from '../useApp'
@@ -65,6 +65,22 @@ export function Wheel({ slices, onResult, disabled }: Props) {
       },
     })
   }
+
+  const spinRef = useRef(spin)
+  useEffect(() => {
+    spinRef.current = spin
+  })
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName
+      if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'BUTTON' && tag !== 'TEXTAREA') {
+        e.preventDefault()
+        spinRef.current()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <motion.div

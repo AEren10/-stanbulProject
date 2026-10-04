@@ -29,6 +29,10 @@ export function Home() {
   const [shuffleKey, setShuffleKey] = useState(0)
   const [winner, setWinner] = useState<Place | null>(null)
   const [megaSignal, setMegaSignal] = useState(0)
+  const [greetIdx] = useState(() => {
+    const h = new Date().getHours()
+    return h < 5 ? 0 : h < 12 ? 1 : h < 18 ? 2 : 3
+  })
   const { scrollY } = useScroll()
   const bgRotate = useTransform(scrollY, [0, 1500], [0, 120])
   const bgY = useTransform(scrollY, [0, 1500], [0, 300])
@@ -82,7 +86,7 @@ export function Home() {
           animate={{ y: 0, opacity: 1, rotate: -3 }}
           transition={{ type: 'spring', stiffness: 200, damping: 12 }}
         >
-          ✨ {t.hero_kicker}
+          {t.greet[greetIdx]} {t.hero_kicker}
         </motion.span>
         <h1>
           {t.hero_title.split(' ').map((w, i) => (

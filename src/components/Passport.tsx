@@ -4,7 +4,7 @@ import { PLACE_BY_ID, PLACES } from '../data/places'
 import { TOURS } from '../data/tours'
 import { useApp } from '../useApp'
 import { BounceTitle, Counter } from './fx'
-import { badgeName, calcBadges, calcLevel, calcXp } from '../utils'
+import { badgeName, calcBadges, calcLevel, calcXp, gmapsRoute } from '../utils'
 import { Sunburst } from './Sunburst'
 
 export function Passport() {
@@ -107,6 +107,17 @@ export function Passport() {
             </motion.button>
           ))}
         </div>
+      )}
+
+      {progress.favs.length >= 2 && (
+        <a
+          className="btn fav-route"
+          href={gmapsRoute(progress.favs.slice(0, 10).map((id) => PLACE_BY_ID[id]).filter(Boolean))}
+          target="_blank"
+          rel="noreferrer"
+        >
+          🧭 {t.favRoute}
+        </a>
       )}
 
       <h3 className="section-title">{t.stamps}</h3>

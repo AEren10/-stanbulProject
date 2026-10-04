@@ -495,3 +495,4 @@ main { position: relative; z-index: 1; }
 .quest-item.done .quest-check { background: var(--green); }
 .mega-cta.small { font-size: 20px; padding: 10px 24px; margin: 18px auto 0; display: block; }
 @media (max-width: 760px) { .quest-items { grid-template-columns: 1fr; } }
+.fav-route { margin-top: 16px; }
