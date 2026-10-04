@@ -102,7 +102,7 @@ const rows: Row[] = [
   ['galataportsahil', 'manzara', '🛳️', 'Galataport Sahili', 'Galataport Waterfront', 'Yeni sahil yürüyüşünde Kız Kulesi ve Topkapı manzarası.', 'A fresh waterfront stroll with views toward Maiden\'s Tower and Topkapı.', 41.0245, 28.9815, ['walk', 'view', 'sea'], 45, 'Galataport_Istanbul'],
 
   // ---- Adalar ve Kaçamaklar
-  ['buyukada', 'adalar', '🐴', 'Büyükada', 'Büyükada', 'Faytonlar, ahşap köşkler ve çam kokulu yollarla İstanbul\'dan kaçış.', 'Horse carriages, wooden villas and pine-scented lanes: a real escape from Istanbul.', 40.8749, 29.1295, ['walk', 'relax', 'sea', 'photo'], 300, 'Büyükada'],
+  ['buyukada', 'adalar', '🐴', 'Büyükada', 'Büyükada', 'Bisikletler, ahşap köşkler ve çam kokulu yollarla İstanbul\'dan kaçış.', 'Bikes, wooden villas and pine-scented lanes: a real escape from Istanbul.', 40.8749, 29.1295, ['walk', 'relax', 'sea', 'photo'], 300, 'Büyükada'],
   ['ayayorgi', 'adalar', '⛪', 'Aya Yorgi Manastırı', 'Aya Yorgi Monastery', 'Büyükada\'nın zirvesine yürüyüşle çıkılan tepede kutsal manastır ve Marmara manzarası.', 'A hilltop monastery on Büyükada\'s summit with Marmara views, reached on foot.', 40.8697, 29.1217, ['walk', 'view', 'culture'], 150, 'Büyükada'],
   ['heybeliada', 'adalar', '🚲', 'Heybeliada', 'Heybeliada', 'Ruhban Okulu tepesi, sakin sahiller ve çam ormanları.', 'The seminary hill, quiet beaches and pine forests.', 40.8765, 29.0953, ['walk', 'relax', 'sea'], 240, 'Heybeliada'],
   ['burgazada', 'adalar', '📚', 'Burgazada', 'Burgazada', 'Sait Faik\'in adası; çınarlar, sessizlik ve sahil balık restoranları.', 'Sait Faik\'s island: plane trees, silence and seaside fish restaurants.', 40.883, 29.067, ['walk', 'relax', 'food', 'sea'], 240, 'Burgazada'],

@@ -496,3 +496,31 @@ main { position: relative; z-index: 1; }
 .mega-cta.small { font-size: 20px; padding: 10px 24px; margin: 18px auto 0; display: block; }
 @media (max-width: 760px) { .quest-items { grid-template-columns: 1fr; } }
 .fav-route { margin-top: 16px; }
+
+/* place details */
+.info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; }
+.info-cell { background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 8px 12px; display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; }
+.info-cell span { grid-row: span 2; font-size: 24px; }
+.info-cell small { font-weight: 700; opacity: .65; font-size: 12px; }
+.info-cell b { font-size: 14px; line-height: 1.2; }
+.tip-box { margin-top: 12px; background: color-mix(in srgb, var(--amber) 22%, white); border: 3px dashed var(--ink); border-radius: 16px; padding: 10px 14px; }
+.tip-box p { font-size: 15px !important; margin-top: 2px; }
+.wiki { margin-top: 20px; border-top: 3px dashed var(--ink); padding-top: 14px; }
+.wiki h4 { font-size: 20px; margin: 6px 0 10px; }
+.wiki-text { font-size: 15px !important; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.wiki-text.open { -webkit-line-clamp: unset; }
+.wiki-foot { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+.wiki-loading { margin-top: 16px; }
+.gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; scrollbar-width: thin; }
+.gallery-item { flex: none; width: 130px; height: 96px; border-radius: 12px; overflow: hidden; border: 3px solid var(--ink); background: var(--c); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.gallery-item:hover img { transform: scale(1.1); }
+.lightbox { position: fixed; inset: 0; z-index: 200; background: rgba(20, 10, 24, .88); display: grid; place-items: center; padding: 20px; cursor: zoom-out; }
+.lightbox img { max-width: 100%; max-height: 90vh; border-radius: 16px; border: 4px solid #fff; }
+.pcard-desc { font-size: 13px; font-weight: 600; opacity: .75; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.meta .free { color: var(--green); }
+.tcard-photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; position: relative; margin: 4px 0; }
+.tcard-photo { aspect-ratio: 1; border-radius: 12px; border: 3px solid var(--ink); }
+.tcard-photo .pimg-emoji { font-size: 26px; }
+.tcard .tcard-photo { --c: rgba(255,255,255,.25); }
+.sheet-top { position: sticky; top: 0; height: 0; z-index: 5; }

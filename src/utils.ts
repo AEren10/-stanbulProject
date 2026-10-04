@@ -36,7 +36,10 @@ export function gmapsPlace(p: LatLng): string {
   return `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`
 }
 
-export function gmapsRoute(points: LatLng[], mode: 'walking' | 'transit' = 'walking'): string {
+export function gmapsRoute(
+  points: LatLng[],
+  mode: 'walking' | 'transit' | 'bicycling' | 'driving' = 'walking',
+): string {
   const f = (p: LatLng) => `${p.lat},${p.lng}`
   const origin = points[0]
   const dest = points[points.length - 1]

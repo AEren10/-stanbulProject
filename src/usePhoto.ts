@@ -85,3 +85,80 @@ export function usePhoto(place: Place): Photo | null {
   }, [place])
   return photo
 }
+
+// ---------- richer Wikipedia details (extract + gallery) ----------
+export interface WikiDetails {
+  title: string
+  extract: string
+  page?: string
+  gallery: string[]
+}
+
+const detailCache = new Map<string, WikiDetails | null>()
+
+interface SummaryFull extends Summary {
+  extract?: string
+  type?: string
+  titles?: { canonical?: string }
+}
+
+interface MediaItem {
+  type: string
+  title?: string
+  showInGallery?: boolean
+  srcset?: { src: string; scale: string }[]
+}
+
+async function fetchJson<T>(url: string): Promise<T | null> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    return (await res.json()) as T
+  } catch {
+    return null
+  }
+}
+
+async function detailsFrom(host: string, title: string): Promise<WikiDetails | null> {
+  const base = `https://${host}.wikipedia.org/api/rest_v1/page`
+  const sum = await fetchJson<SummaryFull>(`${base}/summary/${encodeURIComponent(title)}`)
+  if (!sum || !sum.extract || sum.type === 'disambiguation') return null
+  const canonical = sum.titles?.canonical ?? title
+  const media = await fetchJson<{ items?: MediaItem[] }>(`${base}/media-list/${encodeURIComponent(canonical)}`)
+  const gallery = (media?.items ?? [])
+    .filter((m) => m.type === 'image' && m.showInGallery !== false && m.srcset?.length && !/\.svg$/i.test(m.title ?? ''))
+    .map((m) => {
+      const src = m.srcset![m.srcset!.length - 1].src
+      return src.startsWith('//') ? `https:${src}` : src
+    })
+    .slice(0, 8)
+  return { title: canonical.replace(/_/g, ' '), extract: sum.extract, page: sum.content_urls?.desktop?.page, gallery }
+}
+
+export function useWikiDetails(place: Place, lang: 'tr' | 'en'): WikiDetails | null | undefined {
+  const key = `${lang}:${place.id}`
+  const [state, setState] = useState<{ key: string; val: WikiDetails | null | undefined }>(() => ({
+    key,
+    val: detailCache.get(key),
+  }))
+  useEffect(() => {
+    if (detailCache.has(key)) return
+    let alive = true
+    ;(async () => {
+      let d: WikiDetails | null = null
+      if (lang === 'tr') {
+        d = await detailsFrom('tr', place.wtr ?? place.tr)
+        if (!d && place.wiki) d = await detailsFrom('en', place.wiki)
+      } else {
+        if (place.wiki) d = await detailsFrom('en', place.wiki)
+        if (!d) d = await detailsFrom('en', place.en)
+      }
+      detailCache.set(key, d)
+      if (alive) setState({ key, val: d })
+    })()
+    return () => {
+      alive = false
+    }
+  }, [key, lang, place])
+  return state.key === key ? state.val : detailCache.get(key)
+}

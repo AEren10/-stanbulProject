@@ -53,8 +53,11 @@ export interface TourStep {
   en: string
 }
 
+export type TourTheme = 'history' | 'food' | 'nature' | 'art' | 'sea' | 'night'
+
 export interface Tour {
   id: string
+  theme: TourTheme
   emoji: string
   color: string
   tr: string

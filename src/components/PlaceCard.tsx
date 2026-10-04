@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { CAT_BY_ID } from '../data/categories'
+import { PLACE_INFO } from '../data/placeInfo'
 import type { Place } from '../data/types'
 import { useApp } from '../useApp'
 import { useTilt } from '../useTilt'
@@ -42,8 +43,11 @@ export function PlaceCard({ place, index = 0 }: { place: Place; index?: number }
       <span className="pcard-shine" aria-hidden />
       <div className="pcard-body">
         <h4>{lang === 'tr' ? place.tr : place.en}</h4>
+        <p className="pcard-desc">{lang === 'tr' ? place.dtr : place.den}</p>
         <div className="meta">
           <span>⏱ {fmtMins(place.mins, t)}</span>
+          {PLACE_INFO[place.id] && <span>🏙️ {PLACE_INFO[place.id].district}</span>}
+          {PLACE_INFO[place.id]?.price === 'free' && <span className="free">🆓 {t.price.free}</span>}
           {userPos && <span>📍 {fmtDist(distanceKm(userPos, place), t)}</span>}
         </div>
       </div>

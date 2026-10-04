@@ -6,6 +6,7 @@ import { distanceKm, fmtDist, fmtMins, gmapsPlace } from '../utils'
 import { usePhoto } from '../usePhoto'
 import type { Place } from '../data/types'
 import { FavButton } from './FavButton'
+import { InfoGrid, WikiSection } from './PlaceDetails'
 import { PlaceImage } from './PlaceImage'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -81,11 +82,13 @@ export function PlaceModal() {
             transition={{ type: 'spring', stiffness: 260, damping: 26 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button type="button" className="x" onClick={() => setOpenPlace(null)} aria-label={t.close}>
-              ✕
-            </button>
+            <div className="sheet-top">
+              <button type="button" className="x" onClick={() => setOpenPlace(null)} aria-label={t.close}>
+                ✕
+              </button>
+              <FavButton id={place.id} className="sheet-fav" />
+            </div>
             <PlaceImage place={place} big className="sheet-img" />
-            <FavButton id={place.id} className="sheet-fav" />
             <div className="sheet-body">
               <span className="cat-chip">
                 {CAT_BY_ID[place.cat].emoji} {lang === 'tr' ? CAT_BY_ID[place.cat].tr : CAT_BY_ID[place.cat].en}
@@ -108,6 +111,7 @@ export function PlaceModal() {
                   )
                 })}
               </div>
+              <InfoGrid place={place} />
               <div className="actions">
                 <button
                   type="button"
@@ -125,6 +129,7 @@ export function PlaceModal() {
                 <WikiLink place={place} />
                 <ShareButton place={place} />
               </div>
+              <WikiSection key={place.id} place={place} />
             </div>
           </motion.div>
         </motion.div>

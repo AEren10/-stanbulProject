@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { PLACE_BY_ID } from '../data/places'
 import { TOURS } from '../data/tours'
-import type { Tour } from '../data/types'
+import type { Tour, TourTheme } from '../data/types'
 import { useApp } from '../useApp'
 import { BounceTitle } from './fx'
 import { distanceKm, fmtDist, fmtMins, gmapsRoute, tourPlaces } from '../utils'
@@ -26,7 +26,11 @@ function TourDetail({ tour }: { tour: Tour }) {
   const allDone = currentIdx === -1
   const [selected, setSelected] = useState<string | null>(null)
 
-  const gm = gmapsRoute(pts, tour.modeEn.toLowerCase().includes('on foot') || tour.modeEn.startsWith('Walk') ? 'walking' : 'transit')
+  const m = tour.modeEn.toLowerCase()
+  const gm = gmapsRoute(
+    pts,
+    m === 'on foot' ? 'walking' : m === 'bike' ? 'bicycling' : m === 'by car' ? 'driving' : 'transit',
+  )
 
   return (
     <motion.div
@@ -149,6 +153,8 @@ function TourDetail({ tour }: { tour: Tour }) {
 export function Tours() {
   const { lang, t, activeTourId, setActiveTourId, progress, userPos } = useApp()
   const active = TOURS.find((x) => x.id === activeTourId)
+  const [theme, setTheme] = useState<TourTheme | 'all'>('all')
+  const shown = TOURS.filter((x) => theme === 'all' || x.theme === theme)
 
   const nearestId = useMemo(() => {
     if (!userPos) return null
@@ -173,14 +179,31 @@ export function Tours() {
         <BounceTitle text={t.tours_title} />
         <p>{t.tours_sub}</p>
       </header>
-      <div className="tour-grid">
-        {TOURS.map((tour, i) => {
+      <div className="chips scroll">
+        {(['all', 'history', 'food', 'nature', 'art', 'sea', 'night'] as const).map((th) => (
+          <motion.button
+            key={th}
+            type="button"
+            className={`chip ${theme === th ? 'on' : ''}`}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setTheme(th)}
+          >
+            {t.tourThemes[th]}{' '}
+            <small className="count-pill">{th === 'all' ? TOURS.length : TOURS.filter((x) => x.theme === th).length}</small>
+          </motion.button>
+        ))}
+      </div>
+      <motion.div layout className="tour-grid">
+        <AnimatePresence mode="popLayout">
+        {shown.map((tour, i) => {
           const { pts, km, mins } = tourStats(tour)
           const doneCount = tour.steps.filter((s) => progress.visited.includes(s.id)).length
           const isDone = progress.toursDone.includes(tour.id)
           return (
             <motion.button
               key={tour.id}
+              layout
+              exit={{ opacity: 0, scale: 0.8 }}
               type="button"
               className="tcard"
               style={{ ['--c' as string]: tour.color }}
@@ -203,6 +226,11 @@ export function Tours() {
                 {isDone && <span className="stamp">🏆</span>}
                 {nearestId === tour.id && <span className="near-badge">📍 {t.startNear}</span>}
               </div>
+              <div className="tcard-photos">
+                {pts.slice(0, 4).map((p) => (
+                  <PlaceImage key={p.id} place={p} className="tcard-photo" />
+                ))}
+              </div>
               <h3>{lang === 'tr' ? tour.tr : tour.en}</h3>
               <p>{lang === 'tr' ? tour.dtr : tour.den}</p>
               <div className="dots">
@@ -219,7 +247,8 @@ export function Tours() {
             </motion.button>
           )
         })}
-      </div>
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 }

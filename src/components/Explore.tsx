@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { CATEGORIES, TAGS } from '../data/categories'
 import { PLACES } from '../data/places'
+import { PLACE_INFO } from '../data/placeInfo'
 import type { CatId, Tag } from '../data/types'
 import { useApp } from '../useApp'
 import { distanceKm } from '../utils'
@@ -13,6 +14,7 @@ export function Explore() {
   const [cat, setCat] = useState<CatId | 'all'>(exploreCat)
   const [tag, setTag] = useState<Tag | null>(null)
   const [onlyFav, setOnlyFav] = useState(false)
+  const [onlyFree, setOnlyFree] = useState(false)
   const [q, setQ] = useState('')
   const [sort, setSort] = useState<'name' | 'near'>('name')
 
@@ -22,8 +24,9 @@ export function Explore() {
       if (cat !== 'all' && p.cat !== cat) return false
       if (tag && !p.tags.includes(tag)) return false
       if (onlyFav && !progress.favs.includes(p.id)) return false
+      if (onlyFree && PLACE_INFO[p.id]?.price !== 'free') return false
       if (needle) {
-        const hay = `${p.tr} ${p.en} ${p.dtr} ${p.den}`.toLocaleLowerCase(lang)
+        const hay = `${p.tr} ${p.en} ${p.dtr} ${p.den} ${PLACE_INFO[p.id]?.district ?? ''}`.toLocaleLowerCase(lang)
         if (!hay.includes(needle)) return false
       }
       return true
@@ -34,7 +37,7 @@ export function Explore() {
       res = [...res].sort((a, b) => a[lang].localeCompare(b[lang], lang))
     }
     return res
-  }, [cat, tag, q, sort, userPos, lang, onlyFav, progress.favs])
+  }, [cat, tag, q, sort, userPos, lang, onlyFav, onlyFree, progress.favs])
 
   function chooseNear() {
     if (!userPos) requestLocation()
@@ -89,6 +92,9 @@ export function Explore() {
         ))}
       </div>
       <div className="chips scroll sub">
+        <button type="button" className={`chip mini ${onlyFree ? 'on' : ''}`} onClick={() => setOnlyFree(!onlyFree)}>
+          🆓 {t.freeOnly}
+        </button>
         <button type="button" className={`chip mini ${onlyFav ? 'on' : ''}`} onClick={() => setOnlyFav(!onlyFav)}>
           ❤️ {t.favs} <small className="count-pill">{progress.favs.length}</small>
         </button>
