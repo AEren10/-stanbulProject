@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { AppContext, type AppCtx, type View } from './appContext'
 import { DICT } from './i18n'
-import type { Lang, Place } from './data/types'
+import type { CatId, Lang, Place } from './data/types'
 import { badgeName, calcBadges, type LatLng, type Progress } from './utils'
 
 const KEY = 'ist-progress-v1'
 const LANG_KEY = 'ist-lang'
 
-const EMPTY: Progress = { visited: [], toursDone: [], spins: 0 }
+const EMPTY: Progress = { visited: [], toursDone: [], spins: 0, favs: [], quests: [] }
 
 function loadProgress(): Progress {
   try {
@@ -18,6 +18,8 @@ function loadProgress(): Progress {
         visited: Array.isArray(p.visited) ? p.visited : [],
         toursDone: Array.isArray(p.toursDone) ? p.toursDone : [],
         spins: typeof p.spins === 'number' ? p.spins : 0,
+        favs: Array.isArray(p.favs) ? p.favs : [],
+        quests: Array.isArray(p.quests) ? p.quests : [],
       }
     }
   } catch {
@@ -47,6 +49,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [celebrate, setCelebrate] = useState(0)
   const [activeTourId, setActiveTourId] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [exploreCat, setExploreCat] = useState<CatId | 'all'>('all')
   const prevBadges = useRef<Set<string> | null>(null)
 
   const t = DICT[lang]
@@ -111,6 +114,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCelebrate((c) => c + 1)
   }, [])
 
+  const toggleFav = useCallback((id: string) => {
+    setProgress((p) => ({
+      ...p,
+      favs: p.favs.includes(id) ? p.favs.filter((x) => x !== id) : [...p.favs, id],
+    }))
+  }, [])
+
+  const claimQuest = useCallback((key: string) => {
+    setProgress((p) => (p.quests.includes(key) ? p : { ...p, quests: [...p.quests, key] }))
+    setCelebrate((c) => c + 1)
+  }, [])
+
   const addSpin = useCallback(() => setProgress((p) => ({ ...p, spins: p.spins + 1 })), [])
 
   const resetProgress = useCallback(() => {
@@ -145,6 +160,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setView('map')
   }, [])
 
+  const openCategory = useCallback((c: CatId | 'all') => {
+    setExploreCat(c)
+    setView('explore')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
   const fireCelebrate = useCallback(() => setCelebrate((c) => c + 1), [])
 
   const value = useMemo<AppCtx>(
@@ -175,11 +196,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setActiveTourId,
       toast,
       setToast,
+      exploreCat,
+      openCategory,
+      toggleFav,
+      claimQuest,
     }),
     [
       lang, setLang, t, view, progress, isVisited, toggleVisited, markVisited, finishTour, addSpin,
       resetProgress, userPos, locStatus, requestLocation, clearLocation, openPlace, mapFocus,
-      showOnMap, celebrate, fireCelebrate, activeTourId, toast,
+      showOnMap, celebrate, fireCelebrate, activeTourId, toast, exploreCat, openCategory, toggleFav, claimQuest,
     ],
   )
 

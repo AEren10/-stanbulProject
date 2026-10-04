@@ -65,6 +65,37 @@ export interface Progress {
   visited: string[]
   toursDone: string[]
   spins: number
+  favs: string[]
+  /** dates (YYYY-MM-DD) whose daily quest reward was claimed */
+  quests: string[]
+}
+
+export const XP_QUEST = 30
+
+export function todayKey(d = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** Three deterministic places for today's quest, from different categories. */
+export function dailyQuest(key = todayKey()): Place[] {
+  let h = 0
+  for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  const rand = () => {
+    h = (h * 1664525 + 1013904223) >>> 0
+    return h / 2 ** 32
+  }
+  const all = Object.values(PLACE_BY_ID)
+  const picked: Place[] = []
+  const cats = new Set<string>()
+  let guard = 0
+  while (picked.length < 3 && guard++ < 500) {
+    const p = all[Math.floor(rand() * all.length)]
+    if (!cats.has(p.cat) && p.mins <= 120) {
+      cats.add(p.cat)
+      picked.push(p)
+    }
+  }
+  return picked
 }
 
 export const XP_PLACE = 10
@@ -73,7 +104,9 @@ export const XP_SPIN = 1
 export const LEVEL_STEPS = [0, 40, 120, 260, 450, 700]
 
 export function calcXp(p: Progress): number {
-  return p.visited.length * XP_PLACE + p.toursDone.length * XP_TOUR + p.spins * XP_SPIN
+  return (
+    p.visited.length * XP_PLACE + p.toursDone.length * XP_TOUR + p.spins * XP_SPIN + p.quests.length * XP_QUEST
+  )
 }
 
 export function calcLevel(xp: number): { level: number; cur: number; next: number | null } {
@@ -108,6 +141,8 @@ export function calcBadges(p: Progress): Badge[] {
     { id: 'tour1', emoji: '🗺️', color: '#4A7BE0', earned: p.toursDone.length >= 1 },
     { id: 'tourAll', emoji: '🏆', color: '#E0526F', earned: p.toursDone.length >= TOURS.length },
     { id: 'spin10', emoji: '🎡', color: '#2FAE6E', earned: p.spins >= 10 },
+    { id: 'quest1', emoji: '🎯', color: '#EE6B4B', earned: p.quests.length >= 1 },
+    { id: 'fav5', emoji: '💖', color: '#D45A97', earned: p.favs.length >= 5 },
   ]
   const cats: Badge[] = CATEGORIES.map((c) => ({
     id: c.id,

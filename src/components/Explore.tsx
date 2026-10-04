@@ -5,12 +5,14 @@ import { PLACES } from '../data/places'
 import type { CatId, Tag } from '../data/types'
 import { useApp } from '../useApp'
 import { distanceKm } from '../utils'
+import { BounceTitle } from './fx'
 import { PlaceCard } from './PlaceCard'
 
 export function Explore() {
-  const { lang, t, userPos, locStatus, requestLocation } = useApp()
-  const [cat, setCat] = useState<CatId | 'all'>('all')
+  const { lang, t, userPos, locStatus, requestLocation, exploreCat, progress } = useApp()
+  const [cat, setCat] = useState<CatId | 'all'>(exploreCat)
   const [tag, setTag] = useState<Tag | null>(null)
+  const [onlyFav, setOnlyFav] = useState(false)
   const [q, setQ] = useState('')
   const [sort, setSort] = useState<'name' | 'near'>('name')
 
@@ -19,6 +21,7 @@ export function Explore() {
     let res = PLACES.filter((p) => {
       if (cat !== 'all' && p.cat !== cat) return false
       if (tag && !p.tags.includes(tag)) return false
+      if (onlyFav && !progress.favs.includes(p.id)) return false
       if (needle) {
         const hay = `${p.tr} ${p.en} ${p.dtr} ${p.den}`.toLocaleLowerCase(lang)
         if (!hay.includes(needle)) return false
@@ -31,7 +34,7 @@ export function Explore() {
       res = [...res].sort((a, b) => a[lang].localeCompare(b[lang], lang))
     }
     return res
-  }, [cat, tag, q, sort, userPos, lang])
+  }, [cat, tag, q, sort, userPos, lang, onlyFav, progress.favs])
 
   function chooseNear() {
     if (!userPos) requestLocation()
@@ -41,7 +44,7 @@ export function Explore() {
   return (
     <div className="page">
       <header className="page-head">
-        <h2>{t.explore_title}</h2>
+        <BounceTitle text={t.explore_title} />
         <p>{t.explore_sub}</p>
       </header>
 
@@ -66,10 +69,15 @@ export function Explore() {
 
       <div className="chips scroll">
         <button type="button" className={`chip ${cat === 'all' ? 'on' : ''}`} onClick={() => setCat('all')}>
-          {t.all}
+          {t.all} <small className="count-pill">{PLACES.length}</small>
         </button>
-        {CATEGORIES.map((c) => (
-          <button
+        {CATEGORIES.map((c, i) => (
+          <motion.button
+            initial={{ opacity: 0, y: 14, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.15 + i * 0.04, type: 'spring', stiffness: 300, damping: 16 }}
+            whileHover={{ y: -3, rotate: i % 2 ? 2 : -2 }}
+            whileTap={{ scale: 0.9 }}
             key={c.id}
             type="button"
             className={`chip ${cat === c.id ? 'on' : ''}`}
@@ -77,10 +85,13 @@ export function Explore() {
             onClick={() => setCat(c.id)}
           >
             {c.emoji} {lang === 'tr' ? c.tr : c.en}
-          </button>
+          </motion.button>
         ))}
       </div>
       <div className="chips scroll sub">
+        <button type="button" className={`chip mini ${onlyFav ? 'on' : ''}`} onClick={() => setOnlyFav(!onlyFav)}>
+          ❤️ {t.favs} <small className="count-pill">{progress.favs.length}</small>
+        </button>
         {TAGS.map((tg) => (
           <button
             key={tg.id}
@@ -96,11 +107,15 @@ export function Explore() {
       <motion.div layout className="grid">
         <AnimatePresence mode="popLayout">
           {list.map((p, i) => (
-            <PlaceCard key={p.id} place={p} index={i} />
+            <PlaceCard key={p.id} place={p} index={i % 4} />
           ))}
         </AnimatePresence>
       </motion.div>
-      {list.length === 0 && <p className="empty-text">🤷 {t.noResults}</p>}
+      {list.length === 0 && (
+        <motion.p className="empty-text" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1, rotate: [0, -3, 3, 0] }}>
+          🤷 {t.noResults}
+        </motion.p>
+      )}
     </div>
   )
 }

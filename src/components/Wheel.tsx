@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { CAT_BY_ID } from '../data/categories'
 import type { Place } from '../data/types'
 import { useApp } from '../useApp'
+import { fanfare, isMuted, setMuted, tick } from '../sound'
 
 interface Props {
   slices: Place[]
@@ -25,30 +26,12 @@ function slicePath(a0: number, a1: number): string {
   return `M${C} ${C} L${x0} ${y0} A${R} ${R} 0 ${large} 1 ${x1} ${y1}Z`
 }
 
-let audio: AudioContext | null = null
-function tick() {
-  try {
-    audio ??= new AudioContext()
-    const o = audio.createOscillator()
-    const g = audio.createGain()
-    o.type = 'triangle'
-    o.frequency.value = 880
-    g.gain.setValueAtTime(0.05, audio.currentTime)
-    g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.06)
-    o.connect(g).connect(audio.destination)
-    o.start()
-    o.stop(audio.currentTime + 0.07)
-  } catch {
-    /* ignore */
-  }
-}
-
 export function Wheel({ slices, onResult, disabled }: Props) {
   const { lang, t, addSpin } = useApp()
   const rotate = useMotionValue(0)
   const pointer = useMotionValue(0)
   const [spinning, setSpinning] = useState(false)
-  const [sound, setSound] = useState(true)
+  const [sound, setSound] = useState(!isMuted())
   const lastIdx = useRef(0)
   const n = slices.length
   const seg = 360 / Math.max(n, 1)
@@ -59,7 +42,7 @@ export function Wheel({ slices, onResult, disabled }: Props) {
     if (idx !== lastIdx.current) {
       lastIdx.current = idx
       animate(pointer, [-22, 0], { duration: 0.14, ease: 'easeOut' })
-      if (sound) tick()
+      tick()
     }
   })
 
@@ -77,13 +60,20 @@ export function Wheel({ slices, onResult, disabled }: Props) {
       onComplete: () => {
         setSpinning(false)
         addSpin()
+        fanfare()
         onResult(slices[winner])
       },
     })
   }
 
   return (
-    <div className="wheel-wrap">
+    <motion.div
+      className={`wheel-wrap ${spinning ? 'is-spinning' : ''}`}
+      initial={{ scale: 0.3, rotate: -200, opacity: 0 }}
+      animate={{ scale: 1, rotate: 0, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 70, damping: 13, delay: 0.2 }}
+    >
+      <span className="wheel-halo" aria-hidden />
       <div className="wheel-lights" aria-hidden>
         {Array.from({ length: 24 }, (_, i) => (
           <i key={i} style={{ ['--a' as string]: `${i * 15}deg`, animationDelay: `${(i % 2) * 0.4}s` }} />
@@ -156,12 +146,15 @@ export function Wheel({ slices, onResult, disabled }: Props) {
       <button
         type="button"
         className="wheel-sound"
-        onClick={() => setSound((s) => !s)}
+        onClick={() => {
+          setMuted(sound)
+          setSound(!sound)
+        }}
         aria-label="sound"
         title="sound"
       >
         {sound ? '🔊' : '🔇'}
       </button>
-    </div>
+    </motion.div>
   )
 }

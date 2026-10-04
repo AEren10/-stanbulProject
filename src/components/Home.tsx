@@ -1,10 +1,14 @@
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react'
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CAT_BY_ID, TAGS } from '../data/categories'
 import { PLACES } from '../data/places'
 import type { Place, Tag } from '../data/types'
 import { useApp } from '../useApp'
 import { distanceKm, fmtDist, fmtMins, shuffle } from '../utils'
+import { DailyQuest } from './DailyQuest'
+import { Floaters, SpinBadge } from './fx'
+import { BurstExplorer, CategoryGrid, PicksCarousel, StatsStrip } from './HomeSections'
 import { PlaceImage } from './PlaceImage'
 import { Sunburst } from './Sunburst'
 import { Wheel } from './Wheel'
@@ -24,6 +28,10 @@ export function Home() {
   const [radius, setRadius] = useState(5)
   const [shuffleKey, setShuffleKey] = useState(0)
   const [winner, setWinner] = useState<Place | null>(null)
+  const [megaSignal, setMegaSignal] = useState(0)
+  const { scrollY } = useScroll()
+  const bgRotate = useTransform(scrollY, [0, 1500], [0, 120])
+  const bgY = useTransform(scrollY, [0, 1500], [0, 300])
 
   const candidates = useMemo(() => {
     return PLACES.filter((p) => {
@@ -60,9 +68,12 @@ export function Home() {
 
   return (
     <div className="home">
-      <div className="home-bg" aria-hidden>
-        <Sunburst className="home-sunburst" />
-      </div>
+      <motion.div className="home-bg" aria-hidden style={{ y: bgY }}>
+        <motion.div style={{ rotate: bgRotate }}>
+          <Sunburst className="home-sunburst" />
+        </motion.div>
+      </motion.div>
+      <Floaters />
 
       <section className="hero">
         <motion.span
@@ -87,6 +98,42 @@ export function Home() {
           ))}
         </h1>
         <p>{t.hero_sub}</p>
+        <div className="hero-ctas">
+          <motion.button
+            type="button"
+            className="cta big"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            whileHover={{ scale: 1.06, rotate: -2 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => document.querySelector('.wheel-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+          >
+            🎡 {t.ctaSpin}
+          </motion.button>
+          <motion.button
+            type="button"
+            className="cta big alt"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            whileHover={{ scale: 1.06, rotate: 2 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setMegaSignal((n) => n + 1)}
+          >
+            🚀 {t.sendMe}
+          </motion.button>
+        </div>
+        <SpinBadge
+          className="hero-badge"
+          text={t.badgeText.repeat(2)}
+          center={
+            <>
+              <b>{PLACES.length}</b>
+              <small>{t.badgeCenter}</small>
+            </>
+          }
+        />
       </section>
 
       <div className="home-grid">
@@ -173,6 +220,13 @@ export function Home() {
         </section>
       </div>
 
+      <BurstExplorer onResult={onResult} spinSignal={megaSignal} />
+      <DailyQuest />
+      <StatsStrip />
+      <PicksCarousel />
+      <CategoryGrid />
+
+      {createPortal(
       <AnimatePresence>
         {winner && (
           <motion.div
@@ -197,7 +251,19 @@ export function Home() {
                 <span className="cat-chip">
                   {CAT_BY_ID[winner.cat].emoji} {lang === 'tr' ? CAT_BY_ID[winner.cat].tr : CAT_BY_ID[winner.cat].en}
                 </span>
-                <h2>{name(winner)}</h2>
+                <h2>
+                  {[...name(winner)].map((ch, i) => (
+                    <motion.span
+                      key={i}
+                      style={{ display: 'inline-block', whiteSpace: 'pre' }}
+                      initial={{ y: 30, opacity: 0, rotate: 20 }}
+                      animate={{ y: 0, opacity: 1, rotate: 0 }}
+                      transition={{ delay: 0.25 + i * 0.03, type: 'spring', stiffness: 400, damping: 14 }}
+                    >
+                      {ch}
+                    </motion.span>
+                  ))}
+                </h2>
                 <p>{desc(winner)}</p>
                 <div className="meta">
                   <span>⏱ {fmtMins(winner.mins, t)}</span>
@@ -226,6 +292,7 @@ export function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+      , document.body)}
     </div>
   )
 }

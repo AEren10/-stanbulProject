@@ -4,6 +4,7 @@ import { CAT_BY_ID, CATEGORIES } from '../data/categories'
 import { PLACES } from '../data/places'
 import type { CatId, Place } from '../data/types'
 import { useApp } from '../useApp'
+import { BounceTitle } from './fx'
 import { distanceKm, fmtDist, fmtMins } from '../utils'
 import { MapView } from './MapView'
 import { PlaceImage } from './PlaceImage'
@@ -20,7 +21,7 @@ export function MapPage() {
   return (
     <div className="page map-page">
       <header className="page-head compact">
-        <h2>{t.map_title}</h2>
+        <BounceTitle text={t.map_title} />
         <p>{t.map_sub}</p>
       </header>
       <div className="chips scroll">

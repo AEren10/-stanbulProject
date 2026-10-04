@@ -1,8 +1,5 @@
-import { CATEGORIES } from '../data/categories'
-import { PLACES } from '../data/places'
+import { GROUPS } from '../sunburstGeom'
 import type { Place } from '../data/types'
-
-const TAU = Math.PI * 2
 
 function pt(cx: number, cy: number, r: number, a: number): [number, number] {
   return [cx + r * Math.sin(a), cy - r * Math.cos(a)]
@@ -17,15 +14,6 @@ function wedge(cx: number, cy: number, r0: number, r1: number, a0: number, a1: n
   return `M${x0} ${y0} A${r1} ${r1} 0 ${large} 1 ${x1} ${y1} L${x2} ${y2} A${r0} ${r0} 0 ${large} 0 ${x3} ${y3}Z`
 }
 
-const TOTAL = PLACES.length
-let acc = 0
-const GROUPS = CATEGORIES.map((cat) => {
-  const places = PLACES.filter((p) => p.cat === cat.id)
-  const span = (places.length / TOTAL) * TAU
-  const a0 = acc
-  acc += span
-  return { cat, places, span, a0, a1: acc }
-})
 const C = 300
 
 interface Props {
@@ -34,10 +22,12 @@ interface Props {
   labels?: boolean
   className?: string
   onPlace?: (p: Place) => void
+  onHover?: (p: Place | null) => void
+  activeId?: string | null
 }
 
 /** Three-ring sunburst of categories and places, inspired by the guide poster. */
-export function Sunburst({ visited, labels, className, onPlace }: Props) {
+export function Sunburst({ visited, labels, className, onPlace, onHover, activeId }: Props) {
   const showProgress = visited !== undefined
 
   return (
@@ -67,12 +57,15 @@ export function Sunburst({ visited, labels, className, onPlace }: Props) {
                   key={p.id}
                   d={wedge(C, C, 152, 292, pa0 + 0.002, pa1 - 0.002)}
                   fill={cat.color}
-                  fillOpacity={showProgress ? (done ? 0.95 : 0.14) : 0.32}
+                  className={onPlace ? 'sb-slice' : undefined}
+                  fillOpacity={showProgress ? (done ? 0.95 : 0.14) : activeId === p.id ? 1 : onPlace ? 0.55 : 0.32}
                   stroke="#2a1a2e"
                   strokeOpacity={showProgress && !done ? 0.25 : 0.7}
                   strokeWidth="1"
                   style={onPlace ? { cursor: 'pointer' } : undefined}
                   onClick={onPlace ? () => onPlace(p) : undefined}
+                  onMouseEnter={onHover ? () => onHover(p) : undefined}
+                  onMouseLeave={onHover ? () => onHover(null) : undefined}
                 >
                   <title>{p.tr}</title>
                 </path>

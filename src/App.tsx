@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { AppProvider } from './AppProvider'
 import { Confetti } from './components/Confetti'
 import { Explore } from './components/Explore'
+import { Blobs, ClickSparkles, ScrollProgress } from './components/fx'
 import { Home } from './components/Home'
 import { MapPage } from './components/MapPage'
 import { Nav } from './components/Nav'
@@ -29,16 +30,19 @@ function Shell() {
   const { view, t, toast } = useApp()
   return (
     <div className="app">
+      <Blobs />
+      <ScrollProgress />
       <Nav />
       <Ticker />
       <main>
         <AnimatePresence mode="wait">
           <motion.div
             key={view}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.28 }}
+            initial={{ opacity: 0, y: 40, scale: 0.98, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -20, scale: 0.98, filter: 'blur(6px)' }}
+            transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
+            onAnimationStart={() => window.scrollTo({ top: 0 })}
           >
             {view === 'wheel' && <Home />}
             {view === 'explore' && <Explore />}
@@ -51,6 +55,7 @@ function Shell() {
       <footer className="foot">{t.footer}</footer>
       <PlaceModal />
       <Confetti />
+      <ClickSparkles />
       <AnimatePresence>
         {toast && (
           <motion.div

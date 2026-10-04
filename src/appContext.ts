@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 import type { Dict } from './i18n'
-import type { Lang, Place } from './data/types'
+import type { CatId, Lang, Place } from './data/types'
 import type { LatLng, Progress } from './utils'
 
 export type View = 'wheel' | 'explore' | 'map' | 'tours' | 'passport'
@@ -34,6 +34,11 @@ export interface AppCtx {
   setActiveTourId: (id: string | null) => void
   /** newly earned badge ids to toast */
   toast: string | null
+  /** open explore pre-filtered by a category */
+  exploreCat: CatId | 'all'
+  openCategory: (c: CatId | 'all') => void
+  toggleFav: (id: string) => void
+  claimQuest: (key: string) => void
   setToast: (s: string | null) => void
 }
 

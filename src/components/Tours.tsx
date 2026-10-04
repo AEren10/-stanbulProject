@@ -4,6 +4,7 @@ import { PLACE_BY_ID } from '../data/places'
 import { TOURS } from '../data/tours'
 import type { Tour } from '../data/types'
 import { useApp } from '../useApp'
+import { BounceTitle } from './fx'
 import { distanceKm, fmtDist, fmtMins, gmapsRoute, tourPlaces } from '../utils'
 import { MapView } from './MapView'
 import { PlaceImage } from './PlaceImage'
@@ -169,7 +170,7 @@ export function Tours() {
   return (
     <div className="page">
       <header className="page-head">
-        <h2>{t.tours_title}</h2>
+        <BounceTitle text={t.tours_title} />
         <p>{t.tours_sub}</p>
       </header>
       <div className="tour-grid">
@@ -183,9 +184,10 @@ export function Tours() {
               type="button"
               className="tcard"
               style={{ ['--c' as string]: tour.color }}
-              initial={{ opacity: 0, y: 40, rotate: i % 2 ? 2 : -2 }}
-              animate={{ opacity: 1, y: 0, rotate: 0 }}
-              transition={{ delay: i * 0.07, type: 'spring', stiffness: 220, damping: 18 }}
+              initial={{ opacity: 0, y: 70, rotate: i % 2 ? 6 : -6, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ delay: (i % 3) * 0.09, type: 'spring', stiffness: 200, damping: 16 }}
               whileHover={{ y: -8, rotate: i % 2 ? -1 : 1 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => setActiveTourId(tour.id)}

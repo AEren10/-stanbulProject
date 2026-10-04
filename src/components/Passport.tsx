@@ -3,6 +3,7 @@ import { CAT_BY_ID } from '../data/categories'
 import { PLACE_BY_ID, PLACES } from '../data/places'
 import { TOURS } from '../data/tours'
 import { useApp } from '../useApp'
+import { BounceTitle, Counter } from './fx'
 import { badgeName, calcBadges, calcLevel, calcXp } from '../utils'
 import { Sunburst } from './Sunburst'
 
@@ -18,7 +19,7 @@ export function Passport() {
   return (
     <div className="page">
       <header className="page-head">
-        <h2>{t.passport_title}</h2>
+        <BounceTitle text={t.passport_title} />
         <p>{t.passport_sub}</p>
       </header>
 
@@ -50,9 +51,9 @@ export function Passport() {
             </small>
           </div>
           <div className="stat-row">
-            <div className="stat"><b>{progress.visited.length}</b><small>{t.visitedCount}</small></div>
+            <div className="stat"><b><Counter value={progress.visited.length} /></b><small>{t.visitedCount}</small></div>
             <div className="stat"><b>{progress.toursDone.length}/{TOURS.length}</b><small>{t.toursDone}</small></div>
-            <div className="stat"><b>{progress.spins}</b><small>{t.spins}</small></div>
+            <div className="stat"><b><Counter value={progress.spins} /></b><small>{t.spins}</small></div>
           </div>
         </div>
       </div>
@@ -66,9 +67,10 @@ export function Passport() {
             key={b.id}
             className={`badge ${b.earned ? 'on' : ''}`}
             style={{ ['--c' as string]: b.color }}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.03, type: 'spring', stiffness: 300, damping: 18 }}
+            initial={{ opacity: 0, scale: 0.4, rotateY: 180 }}
+            whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: (i % 9) * 0.05, type: 'spring', stiffness: 200, damping: 16 }}
             whileHover={{ rotate: b.earned ? [0, -6, 6, 0] : 0 }}
             title={
               b.catId
@@ -81,6 +83,31 @@ export function Passport() {
           </motion.div>
         ))}
       </div>
+
+      <h3 className="section-title">❤️ {t.favsMine}</h3>
+      {progress.favs.length === 0 ? (
+        <p className="muted">{t.noFavs}</p>
+      ) : (
+        <div className="stamps">
+          {progress.favs.map((id) => PLACE_BY_ID[id]).filter(Boolean).map((p, i) => (
+            <motion.button
+              key={p.id}
+              type="button"
+              className="stamp-card fav-card"
+              style={{ ['--c' as string]: CAT_BY_ID[p.cat].color }}
+              initial={{ scale: 0, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: 'spring', stiffness: 300, damping: 14, delay: Math.min(i, 10) * 0.04 }}
+              whileHover={{ scale: 1.08, rotate: -3 }}
+              onClick={() => setOpenPlace(p)}
+            >
+              <span>{p.emoji}</span>
+              <small>{lang === 'tr' ? p.tr : p.en}</small>
+            </motion.button>
+          ))}
+        </div>
+      )}
 
       <h3 className="section-title">{t.stamps}</h3>
       {visitedPlaces.length === 0 ? (

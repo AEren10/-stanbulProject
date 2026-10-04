@@ -5,7 +5,10 @@ import { useApp } from '../useApp'
 import { distanceKm, fmtDist, fmtMins, gmapsPlace } from '../utils'
 import { usePhoto } from '../usePhoto'
 import type { Place } from '../data/types'
+import { FavButton } from './FavButton'
 import { PlaceImage } from './PlaceImage'
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 function WikiLink({ place }: { place: Place }) {
   const { t } = useApp()
@@ -21,6 +24,32 @@ function WikiLink({ place }: { place: Place }) {
   )
 }
 
+function ShareButton({ place }: { place: Place }) {
+  const { lang, t } = useApp()
+  const [copied, setCopied] = useState(false)
+  async function share() {
+    const name = lang === 'tr' ? place.tr : place.en
+    const text = `${place.emoji} ${name}: ${lang === 'tr' ? place.dtr : place.den}`
+    const url = gmapsPlace(place)
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: name, text, url })
+        return
+      }
+      await navigator.clipboard.writeText(`${text}\n${url}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1600)
+    } catch {
+      /* cancelled */
+    }
+  }
+  return (
+    <motion.button type="button" className="btn" onClick={share} whileTap={{ scale: 0.9 }}>
+      {copied ? `✅ ${t.copied}` : `📤 ${t.share}`}
+    </motion.button>
+  )
+}
+
 export function PlaceModal() {
   const { openPlace: place, setOpenPlace, lang, t, userPos, isVisited, toggleVisited, showOnMap } = useApp()
 
@@ -31,7 +60,7 @@ export function PlaceModal() {
     return () => window.removeEventListener('keydown', onKey)
   }, [place, setOpenPlace])
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {place && (
         <motion.div
@@ -56,6 +85,7 @@ export function PlaceModal() {
               ✕
             </button>
             <PlaceImage place={place} big className="sheet-img" />
+            <FavButton id={place.id} className="sheet-fav" />
             <div className="sheet-body">
               <span className="cat-chip">
                 {CAT_BY_ID[place.cat].emoji} {lang === 'tr' ? CAT_BY_ID[place.cat].tr : CAT_BY_ID[place.cat].en}
@@ -93,11 +123,13 @@ export function PlaceModal() {
                   🧭 {t.gmaps}
                 </a>
                 <WikiLink place={place} />
+                <ShareButton place={place} />
               </div>
             </div>
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
